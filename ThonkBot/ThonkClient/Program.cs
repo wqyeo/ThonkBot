@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using ThonkClient;
@@ -9,6 +10,8 @@ namespace ThonkClient {
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         internal DiscordSocketClient Client { get; private set; }
+        internal CommandHandler CommandHandler { get; private set; }
+        internal CommandService CommandService { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         private const string CONFIG_FILE_PATH = @"cred/config.json";
@@ -20,11 +23,24 @@ namespace ThonkClient {
 
             Client.Log += Log;
 
-            // Check README.md in 'cred' folder
-            string token = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText(CONFIG_FILE_PATH)).Token;
+            BotConfig config;
+            try {
+                // Check README.md in 'cred' folder
+                config = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText(CONFIG_FILE_PATH));
+            } catch (Exception e) {
+                Console.WriteLine("Error Occured trying to load config file...\r\nError:\r\n");
+                Console.WriteLine($"{e}\r\n");
+                Console.WriteLine("Press anything to exit...");
+                Console.ReadKey();
+                return;
+            }
 
-            await Client.LoginAsync(TokenType.Bot, token);
+            await Client.LoginAsync(TokenType.Bot, config.Token);
             await Client.StartAsync();
+
+            CommandService = new CommandService();
+            CommandHandler = new CommandHandler(Client, CommandService, config.Prefix);
+            await CommandHandler.InstallCommandsAsync();
 
             await Task.Delay(-1);
         }

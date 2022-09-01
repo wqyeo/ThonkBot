@@ -12,6 +12,7 @@ The current template for `config.json`
 ```
 {
   "Token": "YOUR_BOT_TOKEN"
+  "Prefix": "The prefix you want ur bot to use, ex: 't!'."
 }
 ```
 
