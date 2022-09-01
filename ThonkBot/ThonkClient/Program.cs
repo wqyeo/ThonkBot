@@ -2,8 +2,6 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
-using ThonkClient;
-
 
 namespace ThonkClient {
     public class Program {
@@ -12,6 +10,7 @@ namespace ThonkClient {
         internal DiscordSocketClient Client { get; private set; }
         internal CommandHandler CommandHandler { get; private set; }
         internal CommandService CommandService { get; private set; }
+        internal IServiceProvider ServiceProvider { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         private const string CONFIG_FILE_PATH = @"cred/config.json";
@@ -19,7 +18,10 @@ namespace ThonkClient {
         public static Task Main(string[] args) => new Program().MainAsync();
 
         public async Task MainAsync() {
-            Client = new DiscordSocketClient();
+            Client = new DiscordSocketClient(new DiscordSocketConfig {
+                GatewayIntents = GatewayIntents.AllUnprivileged |
+            GatewayIntents.GuildPresences | GatewayIntents.GuildMembers
+            });
 
             Client.Log += Log;
 
